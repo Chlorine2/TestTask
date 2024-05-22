@@ -11,6 +11,9 @@ import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.AttributeSet
+import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import androidx.viewpager.widget.ViewPager
 import com.highrol.testtask.Database.PreferencesManager
@@ -46,12 +49,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractionListener {
         }
         viewPager.currentItem = pagerAdapter.count - 1
 
-        val notificationIntent = intent
-        val fragmentPosition = notificationIntent.getIntExtra("fragment_position", -1)
 
-        if (fragmentPosition != -1) {
-            viewPager.currentItem = fragmentPosition-1
-        }
+    }
+
+    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+        return super.onCreateView(name, context, attrs)
 
     }
 
@@ -63,18 +65,19 @@ class MainActivity : AppCompatActivity(), FragmentInteractionListener {
 
     }
     override fun onRemoveFragment(position: Int) {
-        pagerAdapter.deleteFragment(position)
+        pagerAdapter.deleteFragment(pagerAdapter.count - 1)
         viewPager.currentItem = pagerAdapter.count - 1
         preferencesManager.saveData("pages_count", pagerAdapter.count)
+        notificationManager.cancel(pagerAdapter.count + 1);
     }
 
     override fun sendNotification(position : Int) {
 
 
         val notificationIntent = Intent(this, MainActivity::class.java)
-        notificationIntent.putExtra("fragment_position", position)
+        notificationIntent.putExtra("1", position)
 
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -101,6 +104,12 @@ class MainActivity : AppCompatActivity(), FragmentInteractionListener {
         }
         notificationManager.notify(1, builder.build())
 
+        val notificationIntent2 = intent
+        val fragmentPosition = notificationIntent2.getIntExtra("1", -1)
+
+        if (fragmentPosition != -1) {
+            viewPager.currentItem = fragmentPosition - 1
+        }
     }
 
 }
