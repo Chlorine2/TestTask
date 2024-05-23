@@ -6,15 +6,16 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.widget.RemoteViews
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.ViewPager
 import com.highrol.testtask.Database.PreferencesManager
 import com.highrol.testtask.interfaces.FragmentInteractionListener
@@ -24,10 +25,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractionListener {
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: MyPagerAdapter
     lateinit var notificationManager: NotificationManager
-    lateinit var notificationChannel: NotificationChannel
     lateinit var preferencesManager: PreferencesManager
 
-    lateinit var builder: Notification.Builder
     private val channelId = "i.apps.notifications"
     private val description = "Test notification"
 
@@ -49,13 +48,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractionListener {
         }
         viewPager.currentItem = pagerAdapter.count - 1
 
+        val notificationIntent2 = intent
+        val fragmentPosition = notificationIntent2.getIntExtra("1", -1)
+        if (fragmentPosition != -1) {
+            viewPager.currentItem = fragmentPosition - 1
+        }
 
     }
 
-    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-        return super.onCreateView(name, context, attrs)
-
-    }
 
     override fun onAddNewFragment() {
         val newCount = pagerAdapter.count + 1
@@ -77,39 +77,39 @@ class MainActivity : AppCompatActivity(), FragmentInteractionListener {
         val notificationIntent = Intent(this, MainActivity::class.java)
         notificationIntent.putExtra("1", position)
 
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel = NotificationChannel(channelId, description, NotificationManager.IMPORTANCE_HIGH)
-            notificationChannel.enableLights(true)
-            notificationChannel.lightColor = Color.GREEN
-            notificationChannel.enableVibration(false)
+            val notificationChannel = NotificationChannel(channelId, description, NotificationManager.IMPORTANCE_HIGH).apply {
+                lightColor = Color.GREEN
+                enableVibration(true)
+            }
             notificationManager.createNotificationChannel(notificationChannel)
 
-            builder = Notification.Builder(this, channelId)
+            val builder = Notification.Builder(this, channelId)
                 .setSmallIcon(R.drawable.baseline_notifications_24)
                 .setContentTitle("You create notification")
                 .setContentText("Notification $position")
                 .setContentIntent(pendingIntent)
 
 
+            notificationManager.notify(position, builder.build())
+
+
         } else {
 
-            builder = Notification.Builder(this)
+            val builder = Notification.Builder(this)
                 .setSmallIcon(R.drawable.baseline_notifications_24)
                 .setContentText("Notification $position")
                 .setContentIntent(pendingIntent)
 
-        }
-        notificationManager.notify(1, builder.build())
+            notificationManager.notify(1, builder.build())
 
-        val notificationIntent2 = intent
-        val fragmentPosition = notificationIntent2.getIntExtra("1", -1)
-
-        if (fragmentPosition != -1) {
-            viewPager.currentItem = fragmentPosition - 1
         }
+
+
     }
 
 }
