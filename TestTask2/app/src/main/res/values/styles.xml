@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TimeTextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+        <item name="colorAccent">#fff</item>
+    </style>
+    <style name="CustomSwitch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:switchTextAppearance">@style/CustomSwitchTextAppearance</item>
+    </style>
+
+    <!-- Custom text appearance for Switch -->
+    <style name="CustomSwitchTextAppearance" parent="@android:style/TextAppearance">
+        <item name="android:textSize">8sp</item>
+        <item name="android:fontFamily">@font/medium</item><!-- Change text size as needed -->
+    </style>
+</resources>
